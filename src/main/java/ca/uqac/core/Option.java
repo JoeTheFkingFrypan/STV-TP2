@@ -19,8 +19,8 @@ public class Option {
         if(!value.equals("flag")) {
             this.possibleValues.add(value);
         } else {
-            this.possibleValues.add("[flag present]");
-            this.possibleValues.add("[flag absent]");
+            this.possibleValues.add(FlagStatus.FLAG_PRESENT.getLabel());
+            this.possibleValues.add(FlagStatus.FLAG_ABSENT.getLabel());
         }
     }
 
