@@ -79,9 +79,9 @@ public class ScriptParser {
         for(String token: splitter.split(output)){
             String key = token.substring(0,1);
             if(token.contains("=")) {
-                rule.addConstraint(new ConstraintValue(key, token.substring(4)));
+                rule.addConstraint(new Constraint(key, token.substring(4)));
             } else {
-                rule.addConstraint(new ConstraintPresence(key));
+                rule.addConstraint(new Constraint(key, FlagStatus.FLAG_PRESENT.getLabel()));
             }
         }
         //System.out.println(rule);
