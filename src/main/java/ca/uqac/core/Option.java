@@ -1,21 +1,20 @@
 package ca.uqac.core;
 
-import org.apache.commons.lang3.StringUtils;;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Option {
-    private final String name;
+    private final String key;
     private final List<String> possibleValues;
 
-    public Option(final String name) {
-        this.name = name;
+    public Option(final String key) {
+        this.key = key;
         this.possibleValues = new ArrayList<>();
     }
 
     public void addPossibleValue(final String value) {
-
         if(!value.equals("flag")) {
             this.possibleValues.add(value);
         } else {
@@ -24,8 +23,8 @@ public class Option {
         }
     }
 
-    public String getName() {
-        return this.name;
+    public String getKey() {
+        return this.key;
     }
 
     public List<String> getPossibleValues() {
@@ -38,6 +37,10 @@ public class Option {
 
     @Override
     public String toString() {
-        return "[OPTION] -" + this.name + "   " +StringUtils.join(this.possibleValues, ", ");
+        return "[OPTION] -" + this.key + "   " +StringUtils.join(this.possibleValues, ", ");
+    }
+
+    public String getValueAt(final int index) {
+        return this.possibleValues.get(index);
     }
 }
