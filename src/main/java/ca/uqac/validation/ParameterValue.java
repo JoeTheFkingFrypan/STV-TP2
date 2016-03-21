@@ -2,23 +2,22 @@ package ca.uqac.validation;
 
 import java.util.Objects;
 
-class ParameterValue {
+public class ParameterValue {
     private final String key;
     private final String value;
 
-    ParameterValue(final String key, final String value) {
+    public ParameterValue(final String key, final String value) {
         this.key = key;
         this.value = value;
     }
 
-    String getKey() {
+    public String getKey() {
         return this.key;
     }
 
-    String getValue() {
-        return this.key;
+    public String getValue() {
+        return this.value;
     }
-
 
     @Override
     public boolean equals(Object obj) {

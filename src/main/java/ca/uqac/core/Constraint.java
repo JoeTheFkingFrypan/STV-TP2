@@ -1,5 +1,7 @@
 package ca.uqac.core;
 
+import ca.uqac.validation.ParameterValue;
+
 public class Constraint {
 
     private final String key;
@@ -23,7 +25,7 @@ public class Constraint {
         return this.key + " = " + this.value;
     }
 
-    boolean equals(final String key, final String value) {
-        return this.key.equals(key) && this.value.equals(value);
+    boolean match(final ParameterValue couple) {
+        return this.key.equals(couple.getKey()) && this.value.equals(couple.getValue());
     }
 }
