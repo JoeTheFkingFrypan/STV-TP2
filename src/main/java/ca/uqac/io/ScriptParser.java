@@ -1,4 +1,4 @@
-package io;
+package ca.uqac.io;
 
 import ca.uqac.Context;
 import ca.uqac.core.*;

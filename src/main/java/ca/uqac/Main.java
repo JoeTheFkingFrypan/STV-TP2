@@ -1,6 +1,6 @@
 package ca.uqac;
 
-import io.ScriptParser;
+import ca.uqac.io.ScriptParser;
 
 public class Main {
 

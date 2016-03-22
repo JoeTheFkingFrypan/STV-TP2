@@ -1,4 +1,4 @@
-package io;
+package ca.uqac.io;
 
 class ScriptParserException extends RuntimeException {
 
