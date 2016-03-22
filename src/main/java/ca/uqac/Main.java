@@ -1,6 +1,5 @@
 package ca.uqac;
 
-import ca.uqac.validation.TestCaseGenerator;
 import io.ScriptParser;
 
 public class Main {

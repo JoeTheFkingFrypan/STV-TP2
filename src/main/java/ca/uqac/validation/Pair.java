@@ -26,11 +26,11 @@ public class Pair {
         return this.lhs.equals(other.lhs) && this.rhs.equals(other.rhs);
     }
 
-    ParameterValue getLhsParameterValue() {
+    public ParameterValue getLhsParameterValue() {
         return this.lhs;
     }
 
-    ParameterValue getRhsParameterValue() {
+    public ParameterValue getRhsParameterValue() {
         return this.rhs;
     }
 }

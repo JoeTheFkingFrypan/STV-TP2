@@ -1,13 +1,14 @@
-package ca.uqac.validation;
+package ca.uqac;
 
-import ca.uqac.Context;
+import ca.uqac.validation.Pair;
+import ca.uqac.validation.UnusedCounts;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TestCaseGenerator {
+class TestCaseGenerator {
 
     private final Context context;
     private final List<Pair> testCases;
@@ -15,7 +16,7 @@ public class TestCaseGenerator {
     private List<Pair> availablePairs;
     private UnusedCounts unusedCounts;
 
-    public TestCaseGenerator(final Context context) {
+    TestCaseGenerator(final Context context) {
         this.testCases = new ArrayList<>();
         this.context = context;
         context.displayInfo();
@@ -24,10 +25,9 @@ public class TestCaseGenerator {
     }
 
     private void processPairs() {
+        System.out.println("\n============== PAIRS ==============");
         this.availablePairs = this.context.getPairs();
         this.unusedPairs = new ArrayList<>(this.availablePairs);
-
-        System.out.println("\n============== PAIRS ==============");
         System.out.println("- There are " + this.availablePairs.size() + " pairs that complies to rules");
     }
 
@@ -83,7 +83,7 @@ public class TestCaseGenerator {
         return this.unusedPairs.get(indexOfBestPair);
     }
 
-    public void printSuggestedTestCases() {
+    void printSuggestedTestCases() {
         System.out.println(this.toString());
     }
 

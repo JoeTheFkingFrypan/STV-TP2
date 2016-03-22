@@ -6,14 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-class UnusedCounts {
+public class UnusedCounts {
     private final ConcurrentMap<ParameterValue, AtomicLong> unusedCounts;
 
-    UnusedCounts() {
+    public UnusedCounts() {
         unusedCounts = new ConcurrentHashMap<>();
     }
 
-    void increment(final ParameterValue lhs, ParameterValue rhs) {
+    public void increment(final ParameterValue lhs, ParameterValue rhs) {
         unusedCounts.putIfAbsent(lhs, new AtomicLong(0));
         unusedCounts.get(lhs).incrementAndGet();
 
@@ -21,7 +21,7 @@ class UnusedCounts {
         unusedCounts.get(rhs).incrementAndGet();
     }
 
-    int getWeightFrom(ParameterValue lhs, ParameterValue rhs) {
+    public int getWeightFrom(ParameterValue lhs, ParameterValue rhs) {
         return this.unusedCounts.get(lhs).intValue() + this.unusedCounts.get(rhs).intValue();
     }
 
