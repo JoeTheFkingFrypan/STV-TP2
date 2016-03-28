@@ -21,6 +21,11 @@ public class UnusedCounts {
         unusedCounts.get(rhs).incrementAndGet();
     }
 
+    public void decrement(final ParameterValue lhs, ParameterValue rhs) {
+        unusedCounts.get(lhs).decrementAndGet();
+        unusedCounts.get(rhs).decrementAndGet();
+    }
+
     public int getWeightFrom(ParameterValue lhs, ParameterValue rhs) {
         return this.unusedCounts.get(lhs).intValue() + this.unusedCounts.get(rhs).intValue();
     }

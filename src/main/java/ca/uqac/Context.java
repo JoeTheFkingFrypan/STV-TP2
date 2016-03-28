@@ -28,6 +28,8 @@ public class Context {
         this.optionValues += option.getNumberOfPossibleValues();
     }
 
+    public List<Option> getOptions(){ return options; }
+
     public void add(final Rule rule) {
         this.rules.add(rule);
     }
