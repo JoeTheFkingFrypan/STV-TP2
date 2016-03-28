@@ -6,10 +6,7 @@ import ca.uqac.validation.ParameterValue;
 import ca.uqac.validation.UnusedCounts;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 class TestCaseGenerator {
@@ -19,7 +16,7 @@ class TestCaseGenerator {
     private final List<Pair> testCases;
     private List<Pair> unusedPairs;
     private List<Pair> availablePairs;
-    private UnusedCounts unusedCounts;
+    private UnusedCounts unusedCounts = new UnusedCounts();
 
     TestCaseGenerator(final Context context) {
         this.testCases = new ArrayList<>();
@@ -119,6 +116,12 @@ class TestCaseGenerator {
                 }
             }
         }
+
+        //output
+        for(String[] testSet : testSets)
+        {
+            System.out.println(Arrays.toString(testSet));
+        }
     }
 
     private String[] generateTestSet()
@@ -146,80 +149,97 @@ class TestCaseGenerator {
         // position of values from best unused pair
         int firstPos = parameterPositions.indexOf(best.getLhsParameterValue().getKey());
         int secondPos = parameterPositions.indexOf(best.getRhsParameterValue().getKey());
+        boolean startOver = true;
 
-        // generate a random order to fill parameter positions
-        int[] ordering = new int[numberParameters];
-        for (int i = 0; i < numberParameters; ++i) // initially all in order
-            ordering[i] = i;
+        while(startOver) {
+            startOver = false;
 
-        // put firstPos at ordering[0] && secondPos at ordering[1]
-        ordering[0] = firstPos;
-        ordering[firstPos] = 0;
+            // generate a random order to fill parameter positions
+            int[] ordering = new int[numberParameters];
+            for (int i = 0; i < numberParameters; ++i) // initially all in order
+                ordering[i] = i;
 
-        int t = ordering[1];
-        ordering[1] = secondPos;
-        ordering[secondPos] = t;
+            // put firstPos at ordering[0] && secondPos at ordering[1]
+            ordering[0] = firstPos;
+            ordering[firstPos] = 0;
 
-        // shuffle ordering[2] thru ordering[last]
-        for (int i = 2; i < ordering.length; i++)  // Knuth shuffle. start at i=2 because want first two slots left alone
-        {
-            int j = ThreadLocalRandom.current().nextInt(i, ordering.length);
-            int temp = ordering[j];
-            ordering[j] = ordering[i];
-            ordering[i] = temp;
-        }
+            int t = ordering[1];
+            ordering[1] = secondPos;
+            ordering[secondPos] = t;
 
-        // place two parameter values from best unused pair into candidate testSet
-        testSet[firstPos] = best.getLhsParameterValue().getValue();
-        testSet[secondPos] = best.getRhsParameterValue().getValue();
-
-        List<Option> options = context.getOptions();
-
-        // for remaining parameter positions in candidate testSet, try each possible legal value, picking the one which captures the most unused pairs . . .
-        for (int i = 2; i < numberParameters; ++i) // start at 2 because first two parameter have been placed
-        {
-            int currPos = ordering[i];
-
-            //get possibles values for current parameter
-            String[] possibleValues = (String[]) options.get(currPos).getPossibleValues().toArray();
-
-            int currentCount = 0;  // count the unusedPairs grabbed by adding a possible value
-            int highestCount = 0;  // highest of these counts
-            int bestJ = 0;         // index of the possible value which yields the highestCount
-            for (int j = 0; j < possibleValues.length; ++j) // examine pairs created by each possible value and each parameter value already there
+            // shuffle ordering[2] thru ordering[last]
+            for (int i = 2; i < ordering.length; i++)  // Knuth shuffle. start at i=2 because want first two slots left alone
             {
-                String firstKey  = parameterPositions.get(ordering[i]);
-                String firstValue = possibleValues[j];
-                currentCount = 0;
+                int j = ThreadLocalRandom.current().nextInt(i, ordering.length);
+                int temp = ordering[j];
+                ordering[j] = ordering[i];
+                ordering[i] = temp;
+            }
 
-                for (int p = 0; p < i; ++p)  // parameters already placed
+            // place two parameter values from best unused pair into candidate testSet
+            testSet[firstPos] = best.getLhsParameterValue().getValue();
+            testSet[secondPos] = best.getRhsParameterValue().getValue();
+
+            List<Option> options = context.getOptions();
+
+            // for remaining parameter positions in candidate testSet, try each possible legal value, picking the one which captures the most unused pairs . . .
+            for (int i = 2; i < numberParameters; ++i) // start at 2 because first two parameter have been placed
+            {
+                int currPos = ordering[i];
+
+                //get possibles values for current parameter
+                List<String> temp = options.get(currPos).getPossibleValues();
+                String[] possibleValues = new String[temp.size()];
+                possibleValues = temp.toArray(possibleValues);
+
+                int currentCount = 0;  // count the unusedPairs grabbed by adding a possible value
+                int highestCount = -1;  // highest of these counts
+                int bestJ = 0;         // index of the possible value which yields the highestCount
+                for (int j = 0; j < possibleValues.length; ++j) // examine pairs created by each possible value and each parameter value already there
                 {
-                    String secondKey = parameterPositions.get(ordering[p]);
-                    String secondValue = testSet[ordering[p]];
+                    String firstKey = parameterPositions.get(ordering[i]);
+                    String firstValue = possibleValues[j];
+                    boolean disgardValue = false;
+                    currentCount = 0;
 
-                    Pair candidatePair = new Pair(firstKey, firstValue, secondKey, secondValue);
-                    Pair reverseCandidatePair = new Pair(secondKey, secondValue, firstKey, firstValue);
-                    //ConsoleWriteLine("Considering pair " + possibleValues[j] + ", " + testSet[ordering[p]]);
-
-                    if (unusedPairs.contains(candidatePair) ||
-                        unusedPairs.contains(reverseCandidatePair) )  // because of the random order of positions, must check both possibilities
+                    for (int p = 0; p < i; ++p)  // parameters already placed
                     {
-                        //ConsoleWriteLine("Found " + candidatePair[0] + "," + candidatePair[1] + " in unusedPairs");
-                        ++currentCount;
+                        String secondKey = parameterPositions.get(ordering[p]);
+                        String secondValue = testSet[ordering[p]];
+
+                        Pair reverseCandidatePair = new Pair(firstKey, firstValue, secondKey, secondValue);
+                        Pair candidatePair = new Pair(secondKey, secondValue, firstKey, firstValue);
+
+                        if (!disgardValue) {
+                            //check if this pair is valid || reverseCandidatePair is checked inside pairNotForbidden implementation
+                            if (!context.pairNotForbidden(candidatePair.getLhsParameterValue(), candidatePair.getRhsParameterValue())) {
+                                disgardValue = true;
+                                currentCount = -1;
+                            }
+
+                            if (unusedPairs.contains(candidatePair) ||
+                                    unusedPairs.contains(reverseCandidatePair))  // because of the random order of positions, must check both possibilities
+                            {
+                                //ConsoleWriteLine("Found " + candidatePair[0] + "," + candidatePair[1] + " in unusedPairs");
+                                ++currentCount;
+                            }
+                        }
+                    } // p -- each previously placed parameter
+                    if (currentCount > highestCount) {
+                        highestCount = currentCount;
+                        bestJ = j;
                     }
 
-                } // p -- each previously placed parameter
-                if (currentCount > highestCount) {
-                    highestCount = currentCount;
-                    bestJ = j;
-                }
+                } // j -- each possible value at currPos
+                //ConsoleWriteLine("The best value is " + possibleValues[bestJ] + " with count = " + highestCount);
 
-            } // j -- each possible value at currPos
-            //ConsoleWriteLine("The best value is " + possibleValues[bestJ] + " with count = " + highestCount);
-
-            testSet[currPos] = possibleValues[bestJ]; // place the value which captured the most pairs
-        } // i -- each testSet position
-
+                if (bestJ < 0) {
+                    startOver = true;
+                    i = numberParameters + 1; //Exit loop
+                } else
+                    testSet[currPos] = possibleValues[bestJ]; // place the value which captured the most pairs
+            } // i -- each testSet position
+        }
         return testSet;
     }
 

@@ -66,7 +66,7 @@ public class Context {
         return this.availablePairs;
     }
 
-    private boolean pairNotForbidden(final ParameterValue lhs, final ParameterValue rhs) {
+    public boolean pairNotForbidden(final ParameterValue lhs, final ParameterValue rhs) {
         for(Rule rule: this.rules) {
             if(rule.forbidPair()) {
                 if(!rule.validateParameters(lhs, rhs)) {
