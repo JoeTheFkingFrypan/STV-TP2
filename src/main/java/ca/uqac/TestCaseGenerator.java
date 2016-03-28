@@ -58,6 +58,13 @@ class TestCaseGenerator {
         int numberParameters = context.getNumberOfParameters();
         List<String> parameterOrdering = context.getParameterOrdering();
 
+        //count unused
+        for(Pair p : availablePairs)
+        {
+            unusedCounts.increment(p.getLhsParameterValue(), p.getRhsParameterValue());
+        }
+
+        //initializing answer List
         List<String[]> testSets = new ArrayList<String[]>();
 
         while(unusedPairs.size() > 0)
