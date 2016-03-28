@@ -13,7 +13,7 @@ class TestCaseGenerator {
 
     private final int poolSize = 20; //TODO get it as a parameter
     private final Context context;
-    private final List<Pair> testCases;
+    private final List<String[]> testCases;
     private List<Pair> unusedPairs;
     private List<Pair> availablePairs;
     private UnusedCounts unusedCounts = new UnusedCounts();
@@ -61,13 +61,10 @@ class TestCaseGenerator {
             unusedCounts.increment(p.getLhsParameterValue(), p.getRhsParameterValue());
         }
 
-        //initializing answer List
-        List<String[]> testSets = new ArrayList<String[]>();
-
         while(unusedPairs.size() > 0)
         {
-
-            String[][] candidateSets = new String[poolSize][]; // holds candidate testSets
+            // holds candidate testSets
+            String[][] candidateSets = new String[poolSize][];
 
             for (int candidate = 0; candidate < poolSize; ++candidate) {
                 String[] testSet = generateTestSet();
@@ -89,13 +86,9 @@ class TestCaseGenerator {
             }
 
             String[] bestTestSet = candidateSets[indexOfBestCandidate];
-            testSets.add(bestTestSet); // Add the best candidate to the main testSets List
+            testCases.add(bestTestSet); // Add the best candidate to the main testCases List
 
             // now perform all updates
-
-            //ConsoleWriteLine("Updating unusedPairs");
-            //ConsoleWriteLine("Updating unusedCounts");
-            //ConsoleWriteLine("Updating unusedPairsSearch");
             for (int i = 0; i <= numberParameters - 2; ++i)
             {
                 for (int j = i + 1; j <= numberParameters - 1; ++j)
@@ -116,23 +109,16 @@ class TestCaseGenerator {
                 }
             }
         }
-
-        //output
-        for(String[] testSet : testSets)
-        {
-            System.out.println(Arrays.toString(testSet));
-        }
     }
 
     private String[] generateTestSet()
     {
-        int numberParameters = context.getNumberOfParameters();
-        List<String> parameterPositions =  context.getParameterOrdering();
-
-        // make an empty candidate testSet
-        String[] testSet = new String[numberParameters];
-
         // pick "best" unusedPair -- the pair which has the sum of the most unused values
+        Pair best = findBestPair();
+        return getTestSet(best);
+    }
+
+    private Pair findBestPair() {
         int bestWeight = 0;
         int indexOfBestPair = 0;
         for (int i = 0; i < unusedPairs.size(); ++i) {
@@ -144,19 +130,25 @@ class TestCaseGenerator {
             }
         }
 
-        Pair best = unusedPairs.get(indexOfBestPair);
+        return unusedPairs.get(indexOfBestPair);
+    }
+
+    private String[] getTestSet(Pair best)
+    {
+        // make an empty candidate testSet
+        String[] testSet = new String[ context.getNumberOfParameters() ];
 
         // position of values from best unused pair
-        int firstPos = parameterPositions.indexOf(best.getLhsParameterValue().getKey());
-        int secondPos = parameterPositions.indexOf(best.getRhsParameterValue().getKey());
+        int firstPos = context.getParameterOrdering().indexOf(best.getLhsParameterValue().getKey());
+        int secondPos = context.getParameterOrdering().indexOf(best.getRhsParameterValue().getKey());
         boolean startOver = true;
 
         while(startOver) {
             startOver = false;
 
             // generate a random order to fill parameter positions
-            int[] ordering = new int[numberParameters];
-            for (int i = 0; i < numberParameters; ++i) // initially all in order
+            int[] ordering = new int[ context.getNumberOfParameters() ];
+            for (int i = 0; i <  context.getNumberOfParameters() ; ++i) // initially all in order
                 ordering[i] = i;
 
             // put firstPos at ordering[0] && secondPos at ordering[1]
@@ -183,7 +175,7 @@ class TestCaseGenerator {
             List<Option> options = context.getOptions();
 
             // for remaining parameter positions in candidate testSet, try each possible legal value, picking the one which captures the most unused pairs . . .
-            for (int i = 2; i < numberParameters; ++i) // start at 2 because first two parameter have been placed
+            for (int i = 2; i <  context.getNumberOfParameters() ; ++i) // start at 2 because first two parameter have been placed
             {
                 int currPos = ordering[i];
 
@@ -197,14 +189,14 @@ class TestCaseGenerator {
                 int bestJ = 0;         // index of the possible value which yields the highestCount
                 for (int j = 0; j < possibleValues.length; ++j) // examine pairs created by each possible value and each parameter value already there
                 {
-                    String firstKey = parameterPositions.get(ordering[i]);
+                    String firstKey = context.getParameterOrdering().get(ordering[i]);
                     String firstValue = possibleValues[j];
                     boolean disgardValue = false;
                     currentCount = 0;
 
                     for (int p = 0; p < i; ++p)  // parameters already placed
                     {
-                        String secondKey = parameterPositions.get(ordering[p]);
+                        String secondKey = context.getParameterOrdering().get(ordering[p]);
                         String secondValue = testSet[ordering[p]];
 
                         Pair reverseCandidatePair = new Pair(firstKey, firstValue, secondKey, secondValue);
@@ -235,29 +227,13 @@ class TestCaseGenerator {
 
                 if (bestJ < 0) {
                     startOver = true;
-                    i = numberParameters + 1; //Exit loop
+                    i =  context.getNumberOfParameters()  + 1; //Exit loop
                 } else
                     testSet[currPos] = possibleValues[bestJ]; // place the value which captured the most pairs
             } // i -- each testSet position
         }
-        return testSet;
-    }
 
-    private Pair findBestPair() {
-        // pick "best" unusedPair -- the pair which has the sum of the most unused values
-        int bestWeight = 0;
-        int indexOfBestPair = 0;
-        for (int i = 0; i < this.unusedPairs.size(); ++i) {
-            Pair p = this.unusedPairs.get(i);
-            int weight = this.unusedCounts.getWeightFrom(p.getLhsParameterValue(), p.getRhsParameterValue());
-            //System.out.println("[DEBUG]     Weight for " + i + "th(" + p +") is " + weight);
-            if (weight > bestWeight) {
-                bestWeight = weight;
-                indexOfBestPair = i;
-            }
-        }
-        System.out.println("[DEBUG] Index from best pair: " + indexOfBestPair);
-        return this.unusedPairs.get(indexOfBestPair);
+        return testSet;
     }
 
     void printSuggestedTestCases() {
@@ -266,8 +242,13 @@ class TestCaseGenerator {
 
     @Override
     public String toString() {
-        return "\n============== TEST CASES ==============\n" +
-                StringUtils.join(this.testCases, "\n");
+
+        String res = "\n============== TEST CASES ==============\n";
+        for(String[] testSet : testCases)
+        {
+            res += Arrays.toString(testSet) + "\n";
+        }
+        return  res;
     }
 
 }
