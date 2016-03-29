@@ -11,16 +11,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 class TestCaseGenerator {
 
-    private final int poolSize = 20; //TODO get it as a parameter
+    private final int poolSize;
     private final Context context;
     private final List<String[]> testCases;
     private List<Pair> unusedPairs;
     private List<Pair> availablePairs;
     private UnusedCounts unusedCounts = new UnusedCounts();
 
-    TestCaseGenerator(final Context context) {
+    TestCaseGenerator(final Context context, int poolSize) {
         this.testCases = new ArrayList<>();
         this.context = context;
+        this.poolSize = poolSize;
         context.displayInfo();
         this.processPairs();
         this.computeTestCases();

@@ -1,6 +1,6 @@
 package ca.uqac.io;
 
-class ScriptParserException extends RuntimeException {
+public class ScriptParserException extends RuntimeException {
 
     public ScriptParserException(String message, Throwable cause) {
         super(message, cause);
